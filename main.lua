@@ -118,3 +118,51 @@ spawn(function()
 end)
 
 UpdateLog("Tomato Hub đã khởi động thành công!")
+-- [[ LOGIC FIX: AUTO EQUIP & ATTACK ]]
+
+-- 1. Hàm tự động cầm vũ khí (Melee)
+local function EquipWeapon()
+    pcall(function()
+        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if v:IsA("Tool") and (v.ToolTip == "Melee" or v.ToolTip == "Sword") then
+                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
+            end
+        end
+    end)
+end
+
+-- 2. Logic đánh chính (Sửa lại Remote chuẩn Blox Fruit)
+spawn(function()
+    while wait() do
+        if _G.AutoFarm or _G.FastAttack or _G.AutoBounty then
+            pcall(function()
+                EquipWeapon() -- Luôn đảm bảo đang cầm vũ khí
+                
+                -- Remote tấn công chuẩn của Blox Fruit hiện tại
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Attack")
+                
+                -- Giả lập click chuột cho chắc chắn
+                local VirtualUser = game:GetService("VirtualUser")
+                VirtualUser:CaptureController()
+                VirtualUser:ClickButton1(Vector2.new(851, 158))
+            end)
+        end
+    end
+end)
+
+-- 3. Logic Gom Quái (Bring Mob) - Tăng phạm vi quét
+spawn(function()
+    while wait() do
+        if _G.AutoFarm and _G.BringMob then
+            pcall(function()
+                for _, v in pairs(game.Workspace.Enemies:GetChildren()) do
+                    if v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 300 then
+                        v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
+                        v.HumanoidRootPart.CanCollide = false
+                        v.Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOn
+                    end
+                end
+            end)
+        end
+    end
+end)
