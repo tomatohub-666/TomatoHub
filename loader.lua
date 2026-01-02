@@ -13,7 +13,7 @@ end
 Notify("Đang kiểm tra phiên bản...")
 
 -- Link dẫn tới file main.lua của bạn (Đã thêm lệnh phá cache)
-local url = "https://raw.githubusercontent.com/tomatohub-666/TomatoHubb/main/main.lua?v=" .. tostring(os.time())
+local url = "https://raw.githubusercontent.com/tomatohub-666/TomatoHubb/main/main.lua?v="..os.time()))()
 
 local success, result = pcall(function()
     return game:HttpGet(url)
