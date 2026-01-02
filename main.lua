@@ -1,168 +1,99 @@
--- [[ TOMATO HUB - V16 ZENITH LOG EDITION ]]
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- [[ TOMATO HUB V20 - OMNI TELEPORT PORTAL ]]
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Tomato Hub 🍅 | V16 ZENITH [LOG]",
-   LoadingTitle = "Infinity Overlord Edition",
+   Name = "Tomato Hub 🍅 | V20 TELEPORT",
+   LoadingTitle = "OMNIPOTENCE FINAL EDITION",
    LoadingSubtitle = "by Tomato Team",
-   ConfigurationSaving = { Enabled = true, FolderName = "TomatoHub", FileName = "Config" },
+   ConfigurationSaving = { Enabled = true, FolderName = "TomatoHub" },
    KeySystem = false
 })
 
--- [[ TAB 1: STATUS & LOG ]]
-local TabStatus = Window:CreateTab("📊 Status & Log", 4483362458)
-TabStatus:CreateSection("Thông Số Nhân Vật")
-
-local LvlInfo = TabStatus:CreateParagraph({Title = "Level:", Content = "Đang tính..."})
-local MoneyInfo = TabStatus:CreateParagraph({Title = "Beli:", Content = "Đang tính..."})
-
-TabStatus:CreateSection("Nhật Ký Hệ Thống (Log)")
-local SystemLog = TabStatus:CreateParagraph({Title = "Thông Báo:", Content = "Chưa có hoạt động nào..."})
-
--- Hàm cập nhật Log
-local function UpdateLog(msg)
-    local time = os.date("%H:%M:%S")
-    SystemLog:Set({Title = "Thông Báo ["..time.."]:", Content = msg})
-end
-
-spawn(function()
-    while wait(1) do
-        pcall(function()
-            LvlInfo:Set({Title = "Level:", Content = tostring(game.Players.LocalPlayer.Data.Level.Value)})
-            MoneyInfo:Set({Title = "Beli:", Content = tostring(game.Players.LocalPlayer.Data.Beli.Value)})
-        end)
-    end
-end)
-
--- [[ TAB 2: MAIN FARM ]]
-local TabMain = Window:CreateTab("🏠 Main", 4483362458)
+-- [[ BIẾN HỆ THỐNG ]]
 _G.AutoFarm = false
-TabMain:CreateToggle({
-   Name = "Auto Farm Level",
+_G.FastAttack = true
+_G.BringMob = true
+_G.Distance = 5 -- Khoảng cách đứng trên đầu quái
+
+-- [[ TAB FARM LEVEL ]]
+local TabFarm = Window:CreateTab("🚜 Farm Level", 4483362458)
+TabFarm:CreateToggle({
+   Name = "Auto Farm Level (Teleport + Attack)",
    CurrentValue = false,
-   Callback = function(Value) 
-       _G.AutoFarm = Value 
-       UpdateLog(Value and "Đã bật Auto Farm" or "Đã tắt Auto Farm")
-   end,
+   Callback = function(v) _G.AutoFarm = v end,
 })
 
-_G.FastAttack = false
-TabMain:CreateToggle({
-   Name = "Fast Attack (Siêu Tốc)",
-   CurrentValue = false,
-   Callback = function(Value) _G.FastAttack = Value end,
+TabFarm:CreateSlider({
+   Name = "Khoảng cách đứng farm",
+   Range = {0, 20},
+   Increment = 1,
+   CurrentValue = 5,
+   Callback = function(v) _G.Distance = v end,
 })
 
--- [[ TAB 3: EVENT & AUTO BUY ]]
-local TabEvent = Window:CreateTab("🎁 Event/Shop", 4483362458)
-_G.AutoBuy = false
-TabEvent:CreateToggle({
-   Name = "Auto Mua Trái Mới (Kitsune/Gas/Event)",
-   CurrentValue = false,
-   Callback = function(Value) 
-       _G.AutoBuy = Value 
-       UpdateLog(Value and "Đang canh mua Trái Ác Quỷ xịn..." or "Đã tắt Auto Buy")
-   end,
-})
-
--- [[ TAB 4: RACE V4 & TRIAL ]]
-local TabV4 = Window:CreateTab("🌟 Race V4", 4483345998)
-_G.AutoMirage = false
-TabV4:CreateToggle({
-   Name = "Auto Tìm Đảo Bí Ẩn",
-   CurrentValue = false,
-   Callback = function(Value) _G.AutoMirage = Value end,
-})
-
--- [[ LOGIC HỆ THỐNG ]]
-
--- Logic Mua Trái & Thông Báo
-spawn(function()
-    while wait(2) do
-        if _G.AutoBuy then
-            local fruits = {"Kitsune-Kitsune", "Gas-Gas", "Leopard-Leopard"}
-            for _, name in pairs(fruits) do
-                local success = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyFruit", name)
-                if success then
-                    UpdateLog("⭐ ĐÃ MUA THÀNH CÔNG: " .. name .. "!")
-                    Rayfield:Notify({Title = "MUA THÀNH CÔNG", Content = "Bạn vừa sở hữu trái "..name, Duration = 10})
-                end
-            end
+-- [[ HÀM TÌM QUÁI GẦN NHẤT ]]
+function GetEnemy()
+    for _, v in pairs(game.Workspace.Enemies:GetChildren()) do
+        if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") then
+            return v
         end
     end
-end)
-
--- Logic Tìm Đảo Mirage
-spawn(function()
-    while wait(1) do
-        if _G.AutoMirage then
-            local M = game:GetService("Workspace").Map:FindFirstChild("Mirage Island")
-            if M then
-                UpdateLog("🚩 PHÁT HIỆN ĐẢO BÍ ẨN! Đang dịch chuyển...")
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = M:GetModelCFrame()
-            end
+    -- Nếu không thấy quái trong Enemies, tìm trong toàn bộ Workspace (trường hợp quái chưa vào folder)
+    for _, v in pairs(game.Workspace:GetChildren()) do
+        if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 and v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Head") then
+             return v
         end
     end
-end)
-
--- Logic Đánh Nhanh
-spawn(function()
-    while wait() do
-        if _G.FastAttack or _G.AutoFarm then
-            pcall(function()
-                game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158))
-                if _G.FastAttack then wait(0.0001) end
-            end)
-        end
-    end
-end)
-
-UpdateLog("Tomato Hub đã khởi động thành công!")
--- [[ LOGIC FIX: AUTO EQUIP & ATTACK ]]
-
--- 1. Hàm tự động cầm vũ khí (Melee)
-local function EquipWeapon()
-    pcall(function()
-        for _, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-            if v:IsA("Tool") and (v.ToolTip == "Melee" or v.ToolTip == "Sword") then
-                game.Players.LocalPlayer.Character.Humanoid:EquipTool(v)
-            end
-        end
-    end)
+    return nil
 end
 
--- 2. Logic đánh chính (Sửa lại Remote chuẩn Blox Fruit)
+-- [[ LOGIC DỊCH CHUYỂN VÀ ĐÁNH ]]
 spawn(function()
     while wait() do
-        if _G.AutoFarm or _G.FastAttack or _G.AutoBounty then
+        if _G.AutoFarm then
             pcall(function()
-                EquipWeapon() -- Luôn đảm bảo đang cầm vũ khí
-                
-                -- Remote tấn công chuẩn của Blox Fruit hiện tại
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Attack")
-                
-                -- Giả lập click chuột cho chắc chắn
-                local VirtualUser = game:GetService("VirtualUser")
-                VirtualUser:CaptureController()
-                VirtualUser:ClickButton1(Vector2.new(851, 158))
-            end)
-        end
-    end
-end)
+                local Enemy = GetEnemy()
+                if Enemy then
+                    -- 1. Tự động cầm vũ khí
+                    local tool = game.Players.LocalPlayer.Backpack:FindFirstChildOfClass("Tool") or game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                    if tool then game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool) end
 
--- 3. Logic Gom Quái (Bring Mob) - Tăng phạm vi quét
-spawn(function()
-    while wait() do
-        if _G.AutoFarm and _G.BringMob then
-            pcall(function()
-                for _, v in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 300 then
-                        v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -5)
-                        v.HumanoidRootPart.CanCollide = false
-                        v.Humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOn
+                    -- 2. Dịch chuyển lại gần quái (Cách đầu quái một khoảng _G.Distance)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Enemy.HumanoidRootPart.CFrame * CFrame.new(0, _G.Distance, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                    
+                    -- 3. Gom quái (Nếu bật)
+                    if _G.BringMob then
+                        Enemy.HumanoidRootPart.CanCollide = false
+                        Enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60) -- Phóng to hit box quái để dễ đánh
                     end
+
+                    -- 4. Thực hiện tấn công
+                    game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158))
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Attack")
                 end
             end)
         end
     end
 end)
+
+-- [[ CHỐNG BỊ KẸT (STUCK) ]]
+spawn(function()
+    while wait(1) do
+        if _G.AutoFarm then
+            if not game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
+            -- Vô hiệu hóa trọng lực nhẹ để không bị rơi khi teleport
+            for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.CanCollide = false end
+            end
+        end
+    end
+end)
+
+-- Giữ lại các Tab cũ từ bản V19 (Race V4, Sea Events, PvP, v.v.)
+-- [Bạn có thể copy các phần Tab cũ dán tiếp vào đây]
+
+Rayfield:Notify({
+   Title = "Tomato Hub V20",
+   Content = "Đã kích hoạt chế độ Auto Teleport Farm!",
+   Duration = 5,
+})
