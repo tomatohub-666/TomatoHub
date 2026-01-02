@@ -1,142 +1,120 @@
--- [[ TOMATO HUB - V12 INFINITY: AUTO TRIAL & FULL AZURE ]]
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+-- [[ TOMATO HUB - V16 ZENITH LOG EDITION ]]
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Tomato Hub 🍅 | Azure V12 [FINAL]",
+   Name = "Tomato Hub 🍅 | V16 ZENITH [LOG]",
    LoadingTitle = "Infinity Overlord Edition",
    LoadingSubtitle = "by Tomato Team",
    ConfigurationSaving = { Enabled = true, FolderName = "TomatoHub", FileName = "Config" },
    KeySystem = false
 })
 
--- [[ BẢNG TRẠNG THÁI ]]
-local StatsTab = Window:CreateTab("📊 Status", 4483362458)
-local LevelLabel = StatsTab:CreateParagraph({Title = "Level:", Content = "..."})
-local RaceLabel = StatsTab:CreateParagraph({Title = "Race:", Content = tostring(game.Players.LocalPlayer.Data.Race.Value)})
+-- [[ TAB 1: STATUS & LOG ]]
+local TabStatus = Window:CreateTab("📊 Status & Log", 4483362458)
+TabStatus:CreateSection("Thông Số Nhân Vật")
+
+local LvlInfo = TabStatus:CreateParagraph({Title = "Level:", Content = "Đang tính..."})
+local MoneyInfo = TabStatus:CreateParagraph({Title = "Beli:", Content = "Đang tính..."})
+
+TabStatus:CreateSection("Nhật Ký Hệ Thống (Log)")
+local SystemLog = TabStatus:CreateParagraph({Title = "Thông Báo:", Content = "Chưa có hoạt động nào..."})
+
+-- Hàm cập nhật Log
+local function UpdateLog(msg)
+    local time = os.date("%H:%M:%S")
+    SystemLog:Set({Title = "Thông Báo ["..time.."]:", Content = msg})
+end
 
 spawn(function()
     while wait(1) do
         pcall(function()
-            LevelLabel:Set({Title = "Level:", Content = tostring(game.Players.LocalPlayer.Data.Level.Value)})
+            LvlInfo:Set({Title = "Level:", Content = tostring(game.Players.LocalPlayer.Data.Level.Value)})
+            MoneyInfo:Set({Title = "Beli:", Content = tostring(game.Players.LocalPlayer.Data.Beli.Value)})
         end)
     end
 end)
 
--- [[ TAB TRIAL V4 (MỚI) ]]
-local TrialTab = Window:CreateTab("🌟 Auto Trial", 4483345998)
-TrialTab:CreateSection("Thử Thách Tộc V4")
-
-_G.AutoTrial = false
-TrialTab:CreateToggle({
-   Name = "Auto Finish Trial (Hoàn thành thử thách)",
+-- [[ TAB 2: MAIN FARM ]]
+local TabMain = Window:CreateTab("🏠 Main", 4483362458)
+_G.AutoFarm = false
+TabMain:CreateToggle({
+   Name = "Auto Farm Level",
    CurrentValue = false,
-   Callback = function(Value) _G.AutoTrial = Value end,
-})
-
-TrialTab:CreateButton({
-   Name = "Teleport to Temple of Time",
-   Callback = function()
-       game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(28282, 14891, 102)
+   Callback = function(Value) 
+       _G.AutoFarm = Value 
+       UpdateLog(Value and "Đã bật Auto Farm" or "Đã tắt Auto Farm")
    end,
 })
 
-_G.AutoAncient = false
-TrialTab:CreateToggle({
-   Name = "Auto Click Ancient Clock",
-   CurrentValue = false,
-   Callback = function(Value) _G.AutoAncient = Value end,
-})
-
--- [[ TAB CHIẾN ĐẤU & PVP ]]
-local CombatTab = Window:CreateTab("⚔️ Combat", 4483345998)
-_G.AutoBounty = false
-CombatTab:CreateToggle({
-   Name = "Auto Bounty (Săn Người)",
-   CurrentValue = false,
-   Callback = function(Value) _G.AutoBounty = Value end,
-})
-
 _G.FastAttack = false
-CombatTab:CreateToggle({
-   Name = "Fast Attack X100",
+TabMain:CreateToggle({
+   Name = "Fast Attack (Siêu Tốc)",
    CurrentValue = false,
    Callback = function(Value) _G.FastAttack = Value end,
 })
 
--- [[ TAB FARM CHÍNH ]]
-local MainTab = Window:CreateTab("🏠 Main Farm", 4483362458)
-_G.AutoFarm = false
-MainTab:CreateToggle({
-   Name = "Auto Farm Level",
+-- [[ TAB 3: EVENT & AUTO BUY ]]
+local TabEvent = Window:CreateTab("🎁 Event/Shop", 4483362458)
+_G.AutoBuy = false
+TabEvent:CreateToggle({
+   Name = "Auto Mua Trái Mới (Kitsune/Gas/Event)",
    CurrentValue = false,
-   Callback = function(Value) _G.AutoFarm = Value end,
+   Callback = function(Value) 
+       _G.AutoBuy = Value 
+       UpdateLog(Value and "Đang canh mua Trái Ác Quỷ xịn..." or "Đã tắt Auto Buy")
+   end,
 })
 
-_G.BringMob = false
-MainTab:CreateToggle({
-   Name = "Bring Mob (Gom Quái)",
+-- [[ TAB 4: RACE V4 & TRIAL ]]
+local TabV4 = Window:CreateTab("🌟 Race V4", 4483345998)
+_G.AutoMirage = false
+TabV4:CreateToggle({
+   Name = "Auto Tìm Đảo Bí Ẩn",
    CurrentValue = false,
-   Callback = function(Value) _G.BringMob = Value end,
+   Callback = function(Value) _G.AutoMirage = Value end,
 })
 
--- [[ LOGIC HỆ THỐNG V12 ]]
+-- [[ LOGIC HỆ THỐNG ]]
 
--- 1. Logic Auto Trial (Giết quái nhanh trong phòng Trial)
+-- Logic Mua Trái & Thông Báo
 spawn(function()
-    while wait() do
-        if _G.AutoTrial then
-            pcall(function()
-                for _, v in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)
-                        game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158))
-                    end
+    while wait(2) do
+        if _G.AutoBuy then
+            local fruits = {"Kitsune-Kitsune", "Gas-Gas", "Leopard-Leopard"}
+            for _, name in pairs(fruits) do
+                local success = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyFruit", name)
+                if success then
+                    UpdateLog("⭐ ĐÃ MUA THÀNH CÔNG: " .. name .. "!")
+                    Rayfield:Notify({Title = "MUA THÀNH CÔNG", Content = "Bạn vừa sở hữu trái "..name, Duration = 10})
                 end
-            end)
+            end
         end
     end
 end)
 
--- 2. Logic Auto Bounty (Săn Người)
+-- Logic Tìm Đảo Mirage
 spawn(function()
-    while wait() do
-        if _G.AutoBounty then
-            pcall(function()
-                for _, v in pairs(game.Players:GetPlayers()) do
-                    if v ~= game.Players.LocalPlayer and v.Character and v.Character.Humanoid.Health > 0 then
-                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-                        game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158))
-                    end
-                end
-            end)
+    while wait(1) do
+        if _G.AutoMirage then
+            local M = game:GetService("Workspace").Map:FindFirstChild("Mirage Island")
+            if M then
+                UpdateLog("🚩 PHÁT HIỆN ĐẢO BÍ ẨN! Đang dịch chuyển...")
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = M:GetModelCFrame()
+            end
         end
     end
 end)
 
--- 3. Đánh Nhanh Tối Thượng
+-- Logic Đánh Nhanh
 spawn(function()
     while wait() do
-        if _G.AutoFarm or _G.FastAttack then
+        if _G.FastAttack or _G.AutoFarm then
             pcall(function()
                 game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158))
-                if _G.FastAttack then wait(0.0000000001) end
+                if _G.FastAttack then wait(0.0001) end
             end)
         end
     end
 end)
 
--- 4. Auto Click Đồng Hồ Cổ (Ancient Clock)
-spawn(function()
-    while wait(0.5) do
-        if _G.AutoAncient then
-            fireclickdetector(game:GetService("Workspace").Map["Temple of Time"].AncientClock.ClickDetector)
-        end
-    end
-end)
-
-Rayfield:Notify({
-   Title = "Tomato Hub V12 FINAL",
-   Content = "Hệ thống Trial V4 & Auto Bounty đã sẵn sàng!",
-   Duration = 6.5,
-   Image = 4483345998,
-})
+UpdateLog("Tomato Hub đã khởi động thành công!")
